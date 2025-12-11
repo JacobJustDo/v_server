@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+const dotenv = require('dotenv');
+dotenv.config();
 
-const { APP_PORT } = require('../src/config/config.default');
+const { APP_PORT } = process.env;
 /**
  * Module dependencies.
  */
