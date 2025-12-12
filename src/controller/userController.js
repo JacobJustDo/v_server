@@ -4,22 +4,8 @@ class UserController {
     // 用户注册
     async register(ctx, next) {
         const { username, password, role = 0 } = ctx.request.body;
-        if (!username || !password) {
-            ctx.status = 401;
-            ctx.body = { code: 10001, message: 'Missing parameter', data: {} };
-            return;
-        }
-        if (await getUserInfo({ username })) {
-            ctx.status = 409;
-            ctx.body = {
-                code: 10002,
-                message: "User already exists",
-                data: "",
-            };
-            return;
-        }
+        
         const res = await createUser(username, password, role);
-        console.log("=====", res);
         ctx.body = {
             code: 10000,
             message: "User registered successfully",
