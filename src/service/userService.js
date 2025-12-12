@@ -1,10 +1,9 @@
 const User = require('../model/user.model');
 
 class userService {
-    async createUser(username, password, role = 0) {
+    async createUser(user) {
         // 注册逻辑
-        const res = await User.create({ username, password, role });
-        console.log(res);
+        const res = await User.create(user);
         return res;
     }
 
