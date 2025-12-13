@@ -1,8 +1,10 @@
 const { getUserInfo } = require('../service/userService');
-const { userFormateError, userAlreadyExists, userRegisterError } = require('../constant/err.type');
+const { userFormateError, userAlreadyExists, userRegisterError, userDoesNotExist, invalidPassword, userLoginError } = require('../constant/err.type');
+
+const bcrypt = require('bcryptjs');
 
 const userValidate = async (ctx, next) => {
-    const { username } = ctx.request.body;
+    const { username, password } = ctx.request.body;
 
     if (!username || !password) {
         console.error("Validation Error: Missing username or password");
@@ -27,14 +29,47 @@ const userUniqueVerify = async (ctx, next) => {
         }
     } catch (err) {
         console.error("获取用户信息错误", err);
-        // 统一提交错误管理
         ctx.app.emit("error", userRegisterError, ctx);
         return;
     }
     await next();
 }
 
+const bcryptPassword = async (ctx, next) => {
+    const { password } = ctx.request.body;
+    var salt = bcrypt.genSaltSync(10);
+    var hash = bcrypt.hashSync(password, salt);
+
+    ctx.request.body.password = hash;
+    await next();
+}
+
+const verifyLogin = async (ctx, next) => {
+    const { username, password } = ctx.request.body;
+    try {
+        const res = await getUserInfo({ username });
+        if (!res) {
+            ctx.status = 400;
+            ctx.app.emit("error", { userDoesNotExist }, ctx);
+            return;
+        }
+        const isPasswordValid = bcrypt.compareSync(password, res.password);
+        if (!isPasswordValid) {
+            ctx.status = 400;
+            ctx.app.emit("error", { invalidPassword }, ctx);
+            return;
+        }
+        await next();
+    } catch (err) {
+        console.error("用户登录信息错误", err);
+        ctx.app.emit("error", userLoginError, ctx);
+        return;
+    }
+}
+
 module.exports = {
     userValidate,
-    userUniqueVerify
+    userUniqueVerify,
+    bcryptPassword,
+    verifyLogin
 };
