@@ -8,6 +8,8 @@ const logger = require('koa-logger')
 const errHandler = require("./errHandler");
 // 导入用户路由模块
 const userRouter = require("../routes/users.js");
+// 导入主路由模块
+const indexRouter = require("../routes/index.js");
 
 // 实例化 app（创建 Koa 应用实例）
 const app = new Koa();
@@ -27,7 +29,13 @@ app.use(views(__dirname + '/views', {
 
 // 加载路由（使用 app.use() 方法将 userRouter 的路由添加到 Koa 应用中）
 // 路由必须在所有中间件之后
+// 挂载主路由
+app.use(indexRouter.routes());
+app.use(indexRouter.allowedMethods());
+
+// 挂载用户路由
 app.use(userRouter.routes());
+app.use(userRouter.allowedMethods());
 
 app.on("error", errHandler);
 
