@@ -33,7 +33,7 @@ class UserController {
             const user = await getUserInfo({ username });
             const { _doc: { password, ...res } } = user;
             ctx.body = {
-                code: 0,
+                code: 200,
                 message: '用户登录成功',
                 data: {
                     token: jwt.sign(res, JWT_SECRET, { expiresIn: '1d' }),
